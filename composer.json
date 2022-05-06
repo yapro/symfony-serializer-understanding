@@ -1,0 +1,17 @@
+{
+    "name": "yapro/symfony-serializer-understanding",
+    "version": "1.0",
+    "require": {
+        "php": "7.4.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "symfony/serializer-pack": "*",
+        "symfony/validator": "^5.4"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "YaPro\\SymfonySerializerUnderstanding\\Tests\\": "tests/"
+        }
+    }
+}
