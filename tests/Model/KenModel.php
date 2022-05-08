@@ -19,19 +19,14 @@ class KenModel extends DollModel
      * @var DollModel[]
      */
     private array $kids;
-    /**
-     * Используется для проверки, что модель может быть собрана из разных типов параметров.
-     * Например, когда name приходит в query, $surname в теле запроса(request), а city в slug rout'а.
-     */
-    private string $surname;
+
     private string $city;
 
-    public function __construct(string $name, DollModel $wife, array $kids, string $surname = '', string $city = '')
+    public function __construct(string $id, DollModel $wife, array $kids, string $city = '')
     {
-        parent::__construct($name);
+        parent::__construct($id);
         $this->wife = $wife;
         $this->kids = $kids;
-        $this->surname = $surname;
         $this->city = $city;
     }
 
@@ -43,11 +38,6 @@ class KenModel extends DollModel
     public function getKids(): array
     {
         return $this->kids;
-    }
-
-    public function getSurname(): string
-    {
-        return $this->surname;
     }
 
     public function getCity(): string

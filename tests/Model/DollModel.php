@@ -12,19 +12,19 @@ class DollModel
      * @Assert\Length(
      *     min=2,
      *     max=50,
-     *     minMessage="Name must be at least {{ limit }} characters long",
-     *     maxMessage="Name cannot be longer than {{ limit }} characters"
+     *     minMessage="Id must be at least {{ limit }} characters long",
+     *     maxMessage="Id cannot be longer than {{ limit }} characters"
      * )
      */
-    protected string $name;
+    protected string $id;
 
-    public function __construct(string $name)
+    public function __construct(string $id)
     {
-        $this->name = $name;
+        $this->id = $id;
     }
 
-    public function getName(): string
+    public function getId(): string
     {
-        return $this->name;
+        return $this->id;
     }
 }

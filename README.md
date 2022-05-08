@@ -43,4 +43,13 @@ PhpMd: update rules
 docker run --user=1000:1000 --rm -v $(pwd):/app -w /app yapro/symfony-serializer-understanding:latest ./phpmd.phar . text phpmd.xml --exclude .github/workflows,vendor --strict --generate-baseline
 ```
 
+### For myself:
+
+Альтернатива 1: https://thomas.jarrand.fr/blog/serialization/
+Альтернатива 2: JsonSerializable
+- https://github.com/tarantool-php/mapper/blob/master/src/Entity.php#L72
+- https://symfony.com/doc/current/serializer.html
+- https://symfony.com/doc/current/components/serializer.html
+- https://symfony.com/blog/new-in-symfony-4-1-serializer-improvements
+
 Copyrights © YaPro.Ru
