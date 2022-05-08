@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2cd2975f85f86e881f50e608fc54b2c5",
+    "content-hash": "40d4d6608fac7acfb9ef6e958216dc2a",
     "packages": [],
     "packages-dev": [
         {
@@ -3504,6 +3504,58 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.10.0"
             },
             "time": "2021-03-09T10:59:23+00:00"
+        },
+        {
+            "name": "yapro/helpers",
+            "version": "v1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yapro/helpers.git",
+                "reference": "fe3ed420c9829bcc1b0d3cbc84d7ced6d5ec4ba7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yapro/helpers/zipball/fe3ed420c9829bcc1b0d3cbc84d7ced6d5ec4ba7",
+                "reference": "fe3ed420c9829bcc1b0d3cbc84d7ced6d5ec4ba7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "YaPro\\Helper\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Lebedenko Nikolay",
+                    "email": "totx@ya.ru",
+                    "homepage": "http://yapro.ru"
+                }
+            ],
+            "description": "Functions that does not exist in native PHP",
+            "homepage": "https://github.com/yapro/helpers",
+            "keywords": [
+                "extensions",
+                "function",
+                "helpers",
+                "library",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/yapro/helpers/issues",
+                "source": "https://github.com/yapro/helpers/tree/v1.0.3"
+            },
+            "time": "2022-02-16T15:13:52+00:00"
         }
     ],
     "aliases": [],

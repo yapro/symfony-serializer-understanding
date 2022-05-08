@@ -7,7 +7,8 @@
     "require-dev": {
         "phpunit/phpunit": "*",
         "symfony/serializer-pack": "*",
-        "symfony/validator": "^5.4"
+        "symfony/validator": "^5.4",
+        "yapro/helpers": "^1.0"
     },
     "autoload-dev": {
         "psr-4": {
