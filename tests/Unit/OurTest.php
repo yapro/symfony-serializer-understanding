@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Component\PropertyAccess\PropertyAccessorBuilder;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\Extractor\SerializerExtractor;
@@ -21,7 +20,6 @@ use Symfony\Component\Serializer\Mapping\Loader\LoaderChain;
 use Symfony\Component\Serializer\NameConverter\MetadataAwareNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\ConstraintViolationListNormalizer;
 use Symfony\Component\Serializer\Normalizer\DataUriNormalizer;
@@ -31,6 +29,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeZoneNormalizer;
 use Symfony\Component\Serializer\Normalizer\FormErrorNormalizer;
 use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
 use Symfony\Component\Serializer\Normalizer\MimeMessageNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\ProblemNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
@@ -41,8 +40,6 @@ use YaPro\Helper\JsonHelper;
 use YaPro\SymfonySerializerUnderstanding\Tests\Model\BarbieModel;
 use YaPro\SymfonySerializerUnderstanding\Tests\Model\DollModel;
 use YaPro\SymfonySerializerUnderstanding\Tests\Model\KenModel;
-
-use function json_decode;
 
 class OurTest extends TestCase
 {
@@ -96,15 +93,15 @@ class OurTest extends TestCase
         self::$serializer = new Serializer($normalizers, $encoders);
     }
 
-    private function assertJsons(string $left, string $right)
+    private function assertJsons(string $result, string $expected)
     {
         // удаляем переносы строк и пробелы между именами полей и значениями, но не в значениях
-        $leftAsArray = self::$jsonHelper->jsonDecode($left, true);
-        $rightAsArray = self::$jsonHelper->jsonDecode($right, true);
+        $resultAsArray = self::$jsonHelper->jsonDecode($result, true);
+        $expectedAsArray = self::$jsonHelper->jsonDecode($expected, true);
         $this->assertSame(
-            $leftAsArray,
-            $rightAsArray,
-            'Original left: ' . $left . PHP_EOL . 'Original right: ' . $right
+            $expectedAsArray,
+            $resultAsArray,
+            'Original left: ' . $result . PHP_EOL . 'Original right: ' . $expected
         );
     }
 
@@ -153,7 +150,7 @@ class OurTest extends TestCase
         $expected->id = 'Ken';
         $this->assertEquals($expected, $object);
 
-        // step 4: understanding denormalize (денормализация из json завершается ошибкой, поэтому применяют deserialize)
+        // step 4: understanding denormalize (denormalize из json завершается ошибкой, поэтому применяют deserialize)
         $kenFromObject = self::$serializer->denormalize($object, KenModel::class);
         $this->assertEquals($ken, $kenFromObject);
 
@@ -169,11 +166,6 @@ class OurTest extends TestCase
     {
         $result = self::$serializer->serialize($ken, 'json', [
             AbstractNormalizer::IGNORED_ATTRIBUTES => ['city', 'kids'],
-            // AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
-            // AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 2,
-            // AbstractObjectNormalizer::MAX_DEPTH_HANDLER => function($attributeValue, $object, $attribute, $format, $context){
-            //     return '$attributeValue';
-            // },
         ]);
         $this->assertJsons($result, '
             {
@@ -185,22 +177,38 @@ class OurTest extends TestCase
         ');
     }
 
+    // для обработки цикличной зависимости, в Serializer-е есть 2 способа:
     public function testCircularReference()
     {
-        $barbie = new BarbieModel('Barbie');
-        $ken = new KenModel('Ken', $barbie, [], 'Doe', 'Moscow');
-        $barbie->setHusband($ken);
-        $relationHandler = function ($attributeValue) { // , $object, $attribute, $format, $context
-            return $attributeValue->getId();
-        };
-        $result = self::$serializer->serialize($barbie, 'json', [
-                AbstractObjectNormalizer::CALLBACKS => [
-                    'husband' => $relationHandler,
-                ],
-                // AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function($object) {
-                //     return $object->getId();
-                // },
-            ]);
+        $object = new BarbieModel('Barbie');
+        $subObject = new KenModel('Ken', $object, [], 'Moscow');
+        $object->setHusband($subObject);
+
+        $result = self::$serializer->serialize($object, 'json', [
+            // AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 2,
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            },
+        ]);
+        $this->assertJsons($result, '
+            {
+                "husband": {
+                    "wife": "Barbie",
+                    "kids": [],
+                    "city": "Moscow",
+                    "id": "Ken"
+                },
+                "id":"Barbie"
+            }
+        ');
+
+        $result = self::$serializer->serialize($object, 'json', [
+            AbstractNormalizer::CALLBACKS => [
+                'husband' => function ($attributeValue) { // , $object, $attribute, $format, $context
+                    return $attributeValue->getId();
+                },
+            ],
+        ]);
         $this->assertJsons($result, '
             {
                 "husband":"Ken",
@@ -208,4 +216,10 @@ class OurTest extends TestCase
             }
         ');
     }
+
+    // todo написать тест на:
+    // AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
+    // AbstractObjectNormalizer::MAX_DEPTH_HANDLER => function($attributeValue, $object, $attribute, $format, $context){
+    //     return '$attributeValue';
+    // },
 }
